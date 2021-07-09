@@ -13,6 +13,8 @@ object frmLoading: TfrmLoading
   Font.Style = []
   OldCreateOrder = False
   Position = poDefault
+  OnClose = FormClose
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object Shape1: TShape

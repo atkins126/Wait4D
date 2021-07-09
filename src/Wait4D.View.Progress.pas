@@ -27,11 +27,12 @@ type
     ProgressBar1: TProgressBar;
     lblTitulo: TLabel;
     lblDescricao: TLabel;
+    procedure FormCreate(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
-    { Private declarations }
+    FNotificacao : iWait4DNotificacao;
   public
-    { Public declarations }
-    procedure Notificar(aNotificacao: iWait4DNotificacao);
+    procedure Notificar;
     function Ref: iWait4DNotificador;
   end;
 
@@ -40,18 +41,37 @@ var
 
 implementation
 
+uses
+  Wait4D.Notificacao;
+
 {$R *.dfm}
 
 { TfrmProgress }
 
-procedure TfrmProgress.Notificar(aNotificacao: iWait4DNotificacao);
+procedure TfrmProgress.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  FNotificacao.Titulo(EmptyStr);
+  Action:= caFree;
+  frmProgress:= nil;
+end;
+
+procedure TfrmProgress.FormCreate(Sender: TObject);
+begin
+  if not Assigned(FNotificacao) then
+    FNotificacao := TWait4DNotificacao.New(nil);
+  FNotificacao.PosicaoAtual(0);
+  if FNotificacao.Titulo = EmptyStr then
+    FNotificacao.Titulo('Sincronizando...').Descricao('');
+end;
+
+procedure TfrmProgress.Notificar;
 begin
   TThread.Queue(nil, procedure()
     begin
-      lblTitulo.Caption := aNotificacao.Titulo;
-      lblDescricao.Caption := aNotificacao.Descricao;
-      ProgressBar1.Position := aNotificacao.PosicaoAtual;
-      ProgressBar1.Max := aNotificacao.PosicaoMaxima;
+      ProgressBar1.Position := FNotificacao.PosicaoAtual + 1;
+      ProgressBar1.Max := FNotificacao.PosicaoMaxima;
+      lblTitulo.Caption := FNotificacao.Titulo;
+      lblDescricao.Caption := FNotificacao.Descricao;
     end
   );
 end;
